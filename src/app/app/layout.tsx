@@ -13,6 +13,8 @@ import {
   Star,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import OnboardingTour from "@/components/OnboardingTour";
 import { getFavoritesCount } from "@/components/FavoriteButton";
 
 const navItems = [
@@ -36,6 +38,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--bg-primary)" }}>
+      <OnboardingTour />
       {/* Sidebar */}
       <aside className="w-64 flex flex-col fixed h-full z-20" style={{ background: "var(--bg-secondary)", borderRight: "1px solid var(--border-color)" }}>
         <Link href="/" className="flex items-center gap-3 px-6 py-6" style={{ borderBottom: "1px solid var(--border-color)" }}>
@@ -90,7 +93,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main */}
       <main className="flex-1 ml-64 min-h-screen">
-        <div className="p-8">{children}</div>
+        <div className="p-8">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </div>
       </main>
     </div>
   );
