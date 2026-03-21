@@ -11,6 +11,7 @@ import {
   TrendingDown,
   Minus,
 } from "lucide-react";
+import FavoriteButton from "@/components/FavoriteButton";
 
 const tools = [
   { href: "/app/analyze", icon: Search, title: "Price Analyzer", tag: "analyze()", desc: "Deep-dive into pricing position across competitors and channels." },
@@ -115,6 +116,9 @@ export default function AppDashboard() {
                   </p>
                 </div>
 
+                {/* Favorite */}
+                <FavoriteButton itemId={`tool-${tool.tag}`} itemLabel={tool.title} size="sm" />
+
                 {/* Arrow */}
                 <svg
                   className="w-4 h-4 text-gray-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all duration-300 shrink-0"
@@ -145,7 +149,8 @@ export default function AppDashboard() {
         <div className="divide-y divide-white/5">
           {recentChanges.map((item) => (
             <div key={item.product + item.competitor} className="px-6 py-3.5 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-              <div className="flex-1">
+              <FavoriteButton itemId={`product-${item.product}`} itemLabel={item.product} size="sm" />
+              <div className="flex-1 ml-2">
                 <p className="text-sm font-medium text-white">{item.product}</p>
                 <p className="text-xs text-gray-600">{item.competitor}</p>
               </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,7 +10,10 @@ import {
   TrendingUp,
   Bell,
   Home,
+  Star,
 } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
+import { getFavoritesCount } from "@/components/FavoriteButton";
 
 const navItems = [
   { href: "/app", label: "Dashboard", icon: Home },
@@ -21,16 +25,24 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [favCount, setFavCount] = useState(0);
+
+  useEffect(() => {
+    setFavCount(getFavoritesCount());
+    const handler = () => setFavCount(getFavoritesCount());
+    window.addEventListener("favorites-changed", handler);
+    return () => window.removeEventListener("favorites-changed", handler);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-bg-primary flex">
+    <div className="min-h-screen flex" style={{ background: "var(--bg-primary)" }}>
       {/* Sidebar */}
-      <aside className="w-64 bg-bg-secondary border-r border-white/5 flex flex-col fixed h-full z-20">
-        <Link href="/" className="flex items-center gap-3 px-6 py-6 border-b border-white/5">
+      <aside className="w-64 flex flex-col fixed h-full z-20" style={{ background: "var(--bg-secondary)", borderRight: "1px solid var(--border-color)" }}>
+        <Link href="/" className="flex items-center gap-3 px-6 py-6" style={{ borderBottom: "1px solid var(--border-color)" }}>
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center">
-            <Radar className="w-4.5 h-4.5 text-bg-primary" />
+            <Radar className="w-4.5 h-4.5" style={{ color: "var(--bg-primary)" }} />
           </div>
-          <span className="text-lg font-bold text-white tracking-tight">
+          <span className="text-lg font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
             PriceRadar<span className="text-cyan-400">.ai</span>
           </span>
         </Link>
@@ -45,20 +57,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   active
                     ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                    : "hover:bg-cyan-500/5"
                 }`}
+                style={!active ? { color: "var(--text-secondary)" } : undefined}
               >
                 <item.icon className="w-4.5 h-4.5" />
                 {item.label}
               </Link>
             );
           })}
+
+          {/* Favorites count */}
+          {favCount > 0 && (
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+              <Star className="w-4.5 h-4.5 fill-amber-400 text-amber-400" />
+              <span>Favorites</span>
+              <span className="ml-auto px-2 py-0.5 rounded-full text-[11px] font-mono bg-amber-400/10 text-amber-400 border border-amber-400/20">
+                {favCount}
+              </span>
+            </div>
+          )}
         </nav>
 
-        <div className="px-4 py-4 border-t border-white/5">
+        <div className="px-4 py-4 space-y-3" style={{ borderTop: "1px solid var(--border-color)" }}>
+          <ThemeToggle />
           <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-teal-500/10 border border-cyan-500/10">
             <p className="text-xs text-cyan-400 font-medium mb-1">AI Powered</p>
-            <p className="text-xs text-gray-500">Real-time competitor intelligence</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Real-time competitor intelligence</p>
           </div>
         </div>
       </aside>
