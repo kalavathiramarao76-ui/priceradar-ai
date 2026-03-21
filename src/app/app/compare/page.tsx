@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, Loader2, TrendingDown, TrendingUp, Minus, Award } from "lucide-react";
+import FavoriteButton from "@/components/FavoriteButton";
+import ExportMenu from "@/components/ExportMenu";
 
 const mockData = [
   { name: "Your Product", price: 299, rating: 4.5, shipping: "Free", stock: "In Stock", warranty: "2 yr" },
@@ -171,6 +173,10 @@ Be specific with prices, percentages, and actionable insights. Use markdown form
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-teal-400 pulse-dot" />
               <span className="text-xs font-medium text-teal-400">AI Comparison Result</span>
+              <div className="ml-auto flex items-center gap-1">
+                <FavoriteButton itemId="priceradar-comparison" itemLabel="Price Comparison" size="sm" />
+                <ExportMenu content={result} title="Price Comparison" />
+              </div>
             </div>
             <div className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed whitespace-pre-wrap">
               {result}

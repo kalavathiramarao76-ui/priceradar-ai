@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, Loader2, DollarSign, Percent, Target, Zap } from "lucide-react";
+import FavoriteButton from "@/components/FavoriteButton";
+import ExportMenu from "@/components/ExportMenu";
 
 export default function PricingPage() {
   const [cost, setCost] = useState("");
@@ -173,6 +175,10 @@ Be very specific with numbers. Use tables where helpful. Format with markdown.`,
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-cyan-400 pulse-dot" />
               <span className="text-xs font-medium text-cyan-400">AI Pricing Strategy</span>
+              <div className="ml-auto flex items-center gap-1">
+                <FavoriteButton itemId="priceradar-pricing" itemLabel="Pricing Strategy" size="sm" />
+                <ExportMenu content={result} title="Pricing Strategy" />
+              </div>
             </div>
             <div className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed whitespace-pre-wrap">
               {result}

@@ -11,6 +11,7 @@ import {
   Bell,
   Home,
   Star,
+  Settings,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/app/compare", label: "Compare", icon: BarChart3 },
   { href: "/app/pricing", label: "Pricing", icon: TrendingUp },
   { href: "/app/alerts", label: "Alerts", icon: Bell },
+  { href: "/app/settings", label: "Settings", icon: Settings },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

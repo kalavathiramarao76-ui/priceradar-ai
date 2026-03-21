@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Radar, ArrowRight } from "lucide-react";
+import FavoriteButton from "@/components/FavoriteButton";
+import ExportMenu from "@/components/ExportMenu";
 
 export default function AnalyzePage() {
   const [productUrl, setProductUrl] = useState("");
@@ -123,6 +125,10 @@ Format with markdown. Be specific with numbers, percentages, and price points. U
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full bg-cyan-400 pulse-dot" />
               <span className="text-xs font-medium text-cyan-400">AI Analysis Result</span>
+              <div className="ml-auto flex items-center gap-1">
+                <FavoriteButton itemId="priceradar-analysis" itemLabel="Price Analysis" size="sm" />
+                <ExportMenu content={result} title="Price Analysis" />
+              </div>
             </div>
             <div className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed whitespace-pre-wrap">
               {result}
