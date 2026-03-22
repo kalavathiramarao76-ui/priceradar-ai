@@ -47,6 +47,13 @@ Be specific with prices, percentages, and actionable insights. Use markdown form
         }),
       });
 
+      if (res.status === 429) {
+        const errorData = await res.json();
+        if (errorData.error === "FREE_LIMIT_REACHED") {
+          window.dispatchEvent(new CustomEvent("usage-changed", { detail: errorData.count }));
+          return;
+        }
+      }
       const data = await res.json();
       setResult(data.response || data.error || "Comparison failed");
       addToast({ title: "Price comparison complete", variant: "success" });

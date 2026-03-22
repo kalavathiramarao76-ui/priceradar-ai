@@ -52,6 +52,13 @@ Be very specific with numbers. Use tables where helpful. Format with markdown.`,
         }),
       });
 
+      if (res.status === 429) {
+        const errorData = await res.json();
+        if (errorData.error === "FREE_LIMIT_REACHED") {
+          window.dispatchEvent(new CustomEvent("usage-changed", { detail: errorData.count }));
+          return;
+        }
+      }
       const data = await res.json();
       setResult(data.response || data.error || "Pricing suggestion failed");
       addToast({ title: "Pricing strategy generated", variant: "success" });
