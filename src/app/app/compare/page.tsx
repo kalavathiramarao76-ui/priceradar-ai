@@ -6,6 +6,7 @@ import { BarChart3, Loader2, TrendingDown, TrendingUp, Minus, Award } from "luci
 import FavoriteButton from "@/components/FavoriteButton";
 import ExportMenu from "@/components/ExportMenu";
 import AnalysisSkeleton from "@/components/AnalysisSkeleton";
+import { useToast } from "@/components/ToastProvider";
 
 const mockData = [
   { name: "Your Product", price: 299, rating: 4.5, shipping: "Free", stock: "In Stock", warranty: "2 yr" },
@@ -19,6 +20,7 @@ export default function ComparePage() {
   const [productName, setProductName] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const { addToast } = useToast();
 
 
   const handleCompare = async () => {
@@ -47,8 +49,10 @@ Be specific with prices, percentages, and actionable insights. Use markdown form
 
       const data = await res.json();
       setResult(data.response || data.error || "Comparison failed");
+      addToast({ title: "Price comparison complete", variant: "success" });
     } catch {
       setResult("Failed to connect to AI service.");
+      addToast({ title: "Comparison failed", variant: "error" });
     } finally {
       setLoading(false);
     }
@@ -149,11 +153,13 @@ Be specific with prices, percentages, and actionable insights. Use markdown form
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
               placeholder="e.g. 'Sony WH-1000XM5' or 'Gaming Laptop under $1500'"
+              aria-label="Product name to compare"
               className="flex-1 px-4 py-3 bg-bg-card border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 transition-colors"
             />
             <button
               onClick={handleCompare}
               disabled={loading || !productName.trim()}
+              aria-label={loading ? "Comparing prices" : "Compare prices"}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl text-bg-primary font-bold text-sm hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all disabled:opacity-40"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <BarChart3 className="w-4 h-4" />}

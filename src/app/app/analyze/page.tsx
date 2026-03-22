@@ -6,12 +6,14 @@ import { Search, Loader2, Radar, ArrowRight } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
 import ExportMenu from "@/components/ExportMenu";
 import AnalysisSkeleton from "@/components/AnalysisSkeleton";
+import { useToast } from "@/components/ToastProvider";
 
 export default function AnalyzePage() {
   const [productUrl, setProductUrl] = useState("");
   const [competitorUrls, setCompetitorUrls] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const { addToast } = useToast();
 
   const handleAnalyze = async () => {
     if (!productUrl.trim()) return;
@@ -42,8 +44,10 @@ Format with markdown. Be specific with numbers, percentages, and price points. U
 
       const data = await res.json();
       setResult(data.response || data.error || "Analysis failed");
+      addToast({ title: "Price analysis complete", variant: "success" });
     } catch {
       setResult("Failed to connect to AI service. Please try again.");
+      addToast({ title: "Analysis failed", variant: "error" });
     } finally {
       setLoading(false);
     }
@@ -78,6 +82,7 @@ Format with markdown. Be specific with numbers, percentages, and price points. U
             value={productUrl}
             onChange={(e) => setProductUrl(e.target.value)}
             placeholder="e.g. https://yourstore.com/product or 'Sony WH-1000XM5 Headphones'"
+            aria-label="Product URL or name"
             className="w-full px-4 py-3 bg-bg-card border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 transition-colors"
           />
         </div>
@@ -91,6 +96,7 @@ Format with markdown. Be specific with numbers, percentages, and price points. U
             onChange={(e) => setCompetitorUrls(e.target.value)}
             placeholder={"https://competitor1.com/similar-product\nhttps://competitor2.com/similar-product"}
             rows={3}
+            aria-label="Competitor URLs"
             className="w-full px-4 py-3 bg-bg-card border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 transition-colors resize-none"
           />
         </div>
@@ -98,6 +104,7 @@ Format with markdown. Be specific with numbers, percentages, and price points. U
         <button
           onClick={handleAnalyze}
           disabled={loading || !productUrl.trim()}
+          aria-label={loading ? "Analyzing pricing" : "Analyze pricing"}
           className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl text-bg-primary font-bold text-sm hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {loading ? (

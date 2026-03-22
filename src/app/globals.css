@@ -157,6 +157,23 @@ body {
   100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
+/* Toast slide-in */
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Focus-visible outline for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--cyan-accent, #06b6d4);
+  outline-offset: 2px;
+}
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--cyan-accent, #06b6d4);
+  outline-offset: 0px;
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

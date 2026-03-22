@@ -6,6 +6,7 @@ import { TrendingUp, Loader2, DollarSign, Percent, Target, Zap } from "lucide-re
 import FavoriteButton from "@/components/FavoriteButton";
 import ExportMenu from "@/components/ExportMenu";
 import AnalysisSkeleton from "@/components/AnalysisSkeleton";
+import { useToast } from "@/components/ToastProvider";
 
 export default function PricingPage() {
   const [cost, setCost] = useState("");
@@ -14,6 +15,7 @@ export default function PricingPage() {
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const { addToast } = useToast();
 
   const handleSuggest = async () => {
     if (!cost.trim()) return;
@@ -52,8 +54,10 @@ Be very specific with numbers. Use tables where helpful. Format with markdown.`,
 
       const data = await res.json();
       setResult(data.response || data.error || "Pricing suggestion failed");
+      addToast({ title: "Pricing strategy generated", variant: "success" });
     } catch {
       setResult("Failed to connect to AI service.");
+      addToast({ title: "Strategy generation failed", variant: "error" });
     } finally {
       setLoading(false);
     }
@@ -152,6 +156,7 @@ Be very specific with numbers. Use tables where helpful. Format with markdown.`,
       <button
         onClick={handleSuggest}
         disabled={loading || !cost.trim()}
+        aria-label={loading ? "Calculating pricing strategy" : "Get AI pricing strategy"}
         className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl text-bg-primary font-bold text-sm hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all disabled:opacity-40"
       >
         {loading ? (
