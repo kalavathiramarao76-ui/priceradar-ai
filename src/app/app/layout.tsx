@@ -17,6 +17,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import OnboardingTour from "@/components/OnboardingTour";
 import { getFavoritesCount } from "@/components/FavoriteButton";
+import { UserMenu } from "@/components/AuthGate";
 
 const navItems = [
   { href: "/app", label: "Dashboard", icon: Home },
@@ -85,6 +86,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="px-4 py-4 space-y-3" style={{ borderTop: "1px solid var(--border-color)" }}>
+          <UserMenu />
           <ThemeToggle />
           <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-teal-500/10 border border-cyan-500/10">
             <p className="text-xs text-cyan-400 font-medium mb-1">AI Powered</p>

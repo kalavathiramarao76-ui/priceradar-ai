@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { incrementUsage } from "@/lib/usage";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Radar, ArrowRight } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -44,6 +45,7 @@ Format with markdown. Be specific with numbers, percentages, and price points. U
 
       const data = await res.json();
       setResult(data.response || data.error || "Analysis failed");
+      incrementUsage();
       addToast({ title: "Price analysis complete", variant: "success" });
     } catch {
       setResult("Failed to connect to AI service. Please try again.");
