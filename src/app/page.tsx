@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import {
   Radar,
   TrendingUp,
@@ -12,6 +12,153 @@ import {
   Shield,
   Eye,
 } from "lucide-react";
+
+/* ─── Letter Reveal ─── */
+function LetterReveal({ text, className = "", delay = 0 }: {
+  text: string; className?: string; delay?: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setVisible(true); return; }
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.2 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <span ref={ref} className={className} aria-label={text}>
+      {text.split("").map((ch, i) => (
+        <span
+          key={i}
+          className="inline-block transition-all duration-700"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(18px)",
+            transitionDelay: visible ? `${delay + i * 32}ms` : "0ms",
+          }}
+        >
+          {ch === " " ? "\u00A0" : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/* ─── Price Ticker Counter (stock-ticker style: numbers flicker up/down) ─── */
+function PriceTicker({ value, suffix = "" }: { value: string; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [display, setDisplay] = useState(value);
+  const num = parseFloat(value.replace(/[^0-9.]/g, ""));
+  const prefix = value.match(/^[<>]*/)?.[0] || "";
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || isNaN(num)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setDisplay(prefix + "0");
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        obs.disconnect();
+        const start = performance.now();
+        const dur = 1000;
+        const tick = (now: number) => {
+          const t = Math.min((now - start) / dur, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          // Add jitter for stock-ticker feel
+          const jitter = t < 0.85 ? (Math.random() - 0.5) * num * 0.08 : 0;
+          const current = eased * num + jitter;
+          const formatted = num >= 1000000
+            ? (Math.max(0, current) / 1000000).toFixed(0) + "M"
+            : num % 1 !== 0
+            ? Math.max(0, current).toFixed(1)
+            : Math.round(Math.max(0, current)).toString();
+          setDisplay(prefix + formatted);
+          if (t < 1) requestAnimationFrame(tick);
+          else setDisplay(value);
+        };
+        requestAnimationFrame(tick);
+      }
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [num, value, prefix]);
+
+  return <span ref={ref} className="tabular-nums">{display}{suffix}</span>;
+}
+
+/* ─── Chart Draw Animation ─── */
+function ChartDraw({ className = "" }: { className?: string }) {
+  const ref = useRef<SVGSVGElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setVisible(true); return; }
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <svg ref={ref} viewBox="0 0 200 60" className={className} fill="none">
+      <polyline
+        points="0,50 30,42 60,45 90,28 120,32 150,15 180,20 200,8"
+        stroke="url(#chartGrad)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{
+          strokeDasharray: 300,
+          strokeDashoffset: visible ? 0 : 300,
+          transition: "stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      />
+      <defs>
+        <linearGradient id="chartGrad" x1="0" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#14b8a6" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+/* ─── Fade-in Observer ─── */
+function useFadeIn() {
+  const refs = useRef<(HTMLElement | null)[]>([]);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      refs.current.forEach(el => { if (el) { el.style.opacity = "1"; el.style.transform = "none"; } });
+      return;
+    }
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          (e.target as HTMLElement).style.opacity = "1";
+          (e.target as HTMLElement).style.transform = "translateY(0)";
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+    refs.current.forEach(el => { if (el) obs.observe(el); });
+    return () => obs.disconnect();
+  }, []);
+
+  const addRef = (el: HTMLElement | null) => {
+    if (el && !refs.current.includes(el)) refs.current.push(el);
+  };
+  return addRef;
+}
 
 const features = [
   {
@@ -47,6 +194,8 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const addRef = useFadeIn();
+
   return (
     <div className="min-h-screen bg-bg-primary grid-pattern relative overflow-hidden">
       {/* Ambient glow */}
@@ -73,22 +222,22 @@ export default function LandingPage() {
 
       {/* Hero */}
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-24 pb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center"
-        >
+        <div className="text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm mb-10">
             <Zap className="w-3.5 h-3.5" />
             AI-Powered Price Intelligence
           </div>
 
           <h1 className="text-8xl font-black tracking-tight text-white leading-none mb-8">
-            Know every
+            <LetterReveal text="Know every" />
             <br />
-            <span className="gradient-text">price move.</span>
+            <span className="gradient-text"><LetterReveal text="price move." delay={340} /></span>
           </h1>
+
+          {/* Chart draw animation under hero */}
+          <div className="max-w-md mx-auto mb-8 opacity-60">
+            <ChartDraw className="w-full h-auto" />
+          </div>
 
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
             Track competitor prices, get AI-powered pricing recommendations,
@@ -111,54 +260,54 @@ export default function LandingPage() {
               Try Analyzer
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="grid grid-cols-3 gap-8 max-w-3xl mx-auto mt-24"
-        >
-          {[
-            { value: "10M+", label: "Prices Tracked" },
-            { value: "< 2s", label: "AI Response Time" },
-            { value: "99.9%", label: "Accuracy Rate" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-4xl font-black text-white mb-1">
-                {stat.value}
-              </div>
-              <div className="text-sm text-gray-500">{stat.label}</div>
+        <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto mt-24">
+          <div className="text-center">
+            <div className="text-4xl font-black text-white mb-1">
+              <PriceTicker value="10M" suffix="+" />
             </div>
-          ))}
-        </motion.div>
+            <div className="text-sm text-gray-500">Prices Tracked</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-white mb-1">
+              <PriceTicker value="<2" suffix="s" />
+            </div>
+            <div className="text-sm text-gray-500">AI Response Time</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-white mb-1">
+              <PriceTicker value="99.9" suffix="%" />
+            </div>
+            <div className="text-sm text-gray-500">Accuracy Rate</div>
+          </div>
+        </div>
 
         {/* Features */}
         <div className="mt-32">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-center mb-16"
-          >
+          <div className="text-center mb-16">
             <h2 className="text-4xl font-black text-white mb-4">
-              Everything you need to
-              <span className="gradient-text"> dominate pricing</span>
+              <LetterReveal text="Everything you need to" />
+              <span className="gradient-text"><LetterReveal text=" dominate pricing" delay={700} /></span>
             </h2>
             <p className="text-gray-400 text-lg">
               Six powerful AI modules, one unified platform.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feat, i) => (
-              <motion.div
+              <div
                 key={feat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 + i * 0.1 }}
-                className="p-8 rounded-2xl bg-bg-card border border-white/5 card-hover"
+                ref={addRef}
+                className="p-8 rounded-2xl bg-bg-card border border-white/5 card-hover transition-all duration-700"
+                style={{
+                  opacity: 0,
+                  transform: "translateY(24px)",
+                  transitionDelay: `${i * 80}ms`,
+                  willChange: "transform, opacity",
+                }}
               >
                 <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-5">
                   <feat.icon className="w-6 h-6 text-cyan-400" />
@@ -169,7 +318,7 @@ export default function LandingPage() {
                 <p className="text-gray-400 text-sm leading-relaxed">
                   {feat.desc}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
