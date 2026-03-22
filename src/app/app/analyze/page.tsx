@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Radar, ArrowRight } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
 import ExportMenu from "@/components/ExportMenu";
+import AnalysisSkeleton from "@/components/AnalysisSkeleton";
 
 export default function AnalyzePage() {
   const [productUrl, setProductUrl] = useState("");
@@ -113,6 +114,18 @@ Format with markdown. Be specific with numbers, percentages, and price points. U
           )}
         </button>
       </motion.div>
+
+      <AnimatePresence>
+        {loading && !result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <AnalysisSkeleton />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {result && (

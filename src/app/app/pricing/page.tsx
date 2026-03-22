@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, Loader2, DollarSign, Percent, Target, Zap } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
 import ExportMenu from "@/components/ExportMenu";
+import AnalysisSkeleton from "@/components/AnalysisSkeleton";
 
 export default function PricingPage() {
   const [cost, setCost] = useState("");
@@ -163,6 +164,19 @@ Be very specific with numbers. Use tables where helpful. Format with markdown.`,
           </>
         )}
       </button>
+
+      <AnimatePresence>
+        {loading && !result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mt-8"
+          >
+            <AnalysisSkeleton />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {result && (

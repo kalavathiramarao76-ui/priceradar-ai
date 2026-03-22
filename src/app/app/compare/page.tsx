@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, Loader2, TrendingDown, TrendingUp, Minus, Award } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
 import ExportMenu from "@/components/ExportMenu";
+import AnalysisSkeleton from "@/components/AnalysisSkeleton";
 
 const mockData = [
   { name: "Your Product", price: 299, rating: 4.5, shipping: "Free", stock: "In Stock", warranty: "2 yr" },
@@ -161,6 +162,19 @@ Be specific with prices, percentages, and actionable insights. Use markdown form
           </div>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {loading && !result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mt-6"
+          >
+            <AnalysisSkeleton />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {result && (
